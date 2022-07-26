@@ -362,7 +362,14 @@ int main(int argc, char* argv[])
     char renderMode = GL_TRIANGLES;
 
     //olaf init position
-    mat4 olafWorldMatrix = translate(mat4(1.0f), vec3(10.0f, 10.0f, 0.0f)) * scale(mat4(1.0f), vec3(3.0f, 3.0f, 3.0f));
+    mat4 olafWorldMatrix = translate(mat4(1.0f), vec3(10.0f, 10.0f, 2.0f)) * scale(mat4(1.0f), vec3(3.0f, 3.0f, 3.0f));
+
+    //olaf legs initialization
+    mat4 olafLeftLegWorldMatrix = olafWorldMatrix;
+    mat4 olafRightLegWorldMatrix = olafWorldMatrix;
+
+    //olaf leg angle initialization
+    float legAngle = 0.0f;
 
     //prevent teleporting/resizing every frame
     uint framesSinceLastTP = 0;
@@ -453,7 +460,17 @@ int main(int argc, char* argv[])
         glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &nose[0][0]);
         glDrawArrays(renderMode, 48, 36);
 
+        //draw olaf legs
+        mat4 olafRightLeg = olafRightLegWorldMatrix;
+        mat4 olafLeftLeg = olafLeftLegWorldMatrix;
 
+        olafRightLeg = translate(olafRightLeg, vec3(0.0f, -0.2f, -0.5f)) * scale(mat4(1.0), vec3(0.2f, 0.2f, 0.6f));
+        olafLeftLeg = translate(olafLeftLeg, vec3(0.0f, 0.2f, -0.5f)) * scale(mat4(1.0), vec3(0.2f, 0.2f, 0.6f));
+
+        glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &olafRightLeg[0][0]);
+        glDrawArrays(renderMode, 0, 36);
+        glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &olafLeftLeg[0][0]);
+        glDrawArrays(renderMode, 0, 36);
 
 
         // End Frame
@@ -486,6 +503,8 @@ int main(int argc, char* argv[])
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) // move olaf to the left
         {
             olafWorldMatrix = translate(olafWorldMatrix, vec3(0.0f, -0.1f, 0.0f));
+            olafRightLegWorldMatrix = translate(olafWorldMatrix, vec3(0.0f, -0.1f, 0.0f));
+            olafLeftLegWorldMatrix = translate(olafWorldMatrix, vec3(0.0f, -0.1f, 0.0f));
 
             //olafWorldMatrix = translate(mat4(1.0f), vec3(,,));
         }
@@ -493,27 +512,37 @@ int main(int argc, char* argv[])
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) // move olaf to the right
         {
             olafWorldMatrix = translate(olafWorldMatrix, vec3(0.0f, 0.1f, 0.0f));
+            olafRightLegWorldMatrix = translate(olafRightLegWorldMatrix, vec3(0.0f, 0.1f, 0.0f));
+            olafLeftLegWorldMatrix = translate(olafLeftLegWorldMatrix, vec3(0.0f, 0.1f, 0.0f));
         }
 
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) // move olaf backward
         {
             olafWorldMatrix = translate(olafWorldMatrix, vec3(-0.1f, 0.0f, 0.0f));
+            olafRightLegWorldMatrix = translate(olafRightLegWorldMatrix, vec3(-0.1f, 0.0f, 0.0f));
+            olafLeftLegWorldMatrix = translate(olafLeftLegWorldMatrix, vec3(-0.1f, 0.0f, 0.0f));
         }
 
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) // move olaf forward
         {
 
             olafWorldMatrix = translate(olafWorldMatrix, vec3(0.1f, 0.0f, 0.0f));
+            olafRightLegWorldMatrix = translate(olafRightLegWorldMatrix, vec3(0.1f, 0.0f, 0.0f));
+            olafLeftLegWorldMatrix = translate(olafLeftLegWorldMatrix, vec3(0.1f, 0.0f, 0.0f));
         }
 
         if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) // rotate olaf left
         {
             olafWorldMatrix = rotate(olafWorldMatrix, 0.1f, vec3(0.0f,0.0f,1.0f));
+            olafRightLegWorldMatrix = rotate(olafRightLegWorldMatrix, 0.1f, vec3(0.0f, 0.0f, 1.0f));
+            olafLeftLegWorldMatrix = rotate(olafLeftLegWorldMatrix, 0.1f, vec3(0.0f, 0.0f, 1.0f));
         }
 
         if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) // rotate olaf right
         {
             olafWorldMatrix = rotate(olafWorldMatrix, -0.1f, vec3(0.0f, 0.0f, 1.0f));
+            olafRightLegWorldMatrix = rotate(olafRightLegWorldMatrix, -0.1f, vec3(0.0f, 0.0f, 1.0f));
+            olafLeftLegWorldMatrix = rotate(olafLeftLegWorldMatrix, -0.1f, vec3(0.0f, 0.0f, 1.0f));
         }
 
         if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) // rotate camera when right mouse is pressed
@@ -534,22 +563,28 @@ int main(int argc, char* argv[])
 
         if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && framesSinceLastTP > 25) // teleport olaf to random position
         {
-            olafWorldMatrix = translate(mat4(1.0f), vec3(-50.0f + (static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / 100.0f))), 
+            olafWorldMatrix = translate(mat4(1.0f), vec3(-50.0f + (static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / 100.0f))),
                 -50.0f + (static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / 100.0f))),
-                                                                                                                           0.0f));
+                                                                                                                               0.0f));
             framesSinceLastTP = 0;
+            olafRightLegWorldMatrix = olafWorldMatrix;
+            olafLeftLegWorldMatrix = olafWorldMatrix;
         }
 
         if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS && framesSinceLastSize > 5) // scale olaf up
         {
             olafWorldMatrix *= scale(mat4(1.0f), vec3(1.05f, 1.05f, 1.05f));
             framesSinceLastSize = 0;
+            olafRightLegWorldMatrix = olafWorldMatrix;
+            olafLeftLegWorldMatrix = olafWorldMatrix;
         }
 
         if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS && framesSinceLastSize > 5) // scale olaf down
         {
             olafWorldMatrix *= scale(mat4(1.0f), vec3(0.95f, 0.95f, 0.95f));
             framesSinceLastSize = 0;
+            olafRightLegWorldMatrix = olafWorldMatrix;
+            olafLeftLegWorldMatrix = olafWorldMatrix;
         }
 
         if (glfwGetKey(window, GLFW_KEY_HOME) == GLFW_PRESS) // reset world

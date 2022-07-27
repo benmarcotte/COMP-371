@@ -1,3 +1,0 @@
-// backface culling
-    // Enable Backface culling
-    glEnable(GL_CULL_FACE);

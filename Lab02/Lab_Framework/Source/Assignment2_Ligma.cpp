@@ -479,10 +479,8 @@ int main(int argc, char* argv[])
         createCubeVertexArrayObject(vec3(0.85f, 0.85f, 0.85f));
         setWorldMatrix(colorShaderProgram, olaf);
 
-            float olafLimbRotationAmount = 2.5f;
 
         float footAngle = 0.0f;
-        float footDistanceFromBase = 1.0f;
         if (moveForwardAndBack)
         {
             footAngle = (int)(25 * sin(lastFrameTime * 5)) % 75;
@@ -649,7 +647,6 @@ int main(int argc, char* argv[])
         if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS) {
             drawGrid = false;
         }
-
 
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) // move left
         {

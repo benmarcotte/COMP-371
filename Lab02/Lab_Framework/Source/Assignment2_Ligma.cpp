@@ -10,6 +10,10 @@
 #include <iostream>
 #include <list>
 #include <algorithm>
+#include <math.h>
+#include <ctime> 
+#include <vector> 
+#include <fstream>
 
 #define GLEW_STATIC 1   // This allows linking with Static Library on Windows, without DLL
 #include <GL/glew.h>    // Include GLEW - OpenGL Extension Wrangler
@@ -57,17 +61,17 @@ float cameraFovChangeSpeed = 0.01f;
 double lastMousePosX;
 double lastMousePosY;
 
+// Olaf parameters
+bool moveForwardAndBack = false;
+bool moveLeftRight = false;
+
 // Lab
 GLuint loadTexture(const char* filename);
 
 const char* getVertexShaderSource();
-
 const char* getFragmentShaderSource();
-
 const char* getTexturedVertexShaderSource();
-
 const char* getTexturedFragmentShaderSource();
-
 int compileAndLinkShaders(const char* vertexShaderSource, const char* fragmentShaderSource);
 
 struct TexturedColoredVertex
@@ -79,105 +83,6 @@ struct TexturedColoredVertex
     vec3 color;
     vec2 uv;
 };
-
-int createTexturedCubeVertexArrayObject(vec3 color)
-{
-    const TexturedColoredVertex texturedCubeVertexArray[] = {
-        // position,       color        texture   
-TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f)),
-TexturedColoredVertex(vec3(-0.5f,-0.5f, 0.5f), color, vec2(0.0f, 1.0f)),
-TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f)),
-
-TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f)),
-TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f)),
-TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), color, vec2(1.0f, 0.0f)),
-
-TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), color, vec2(1.0f, 1.0f)),
-TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f)),
-TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), color, vec2(0.0f, 1.0f)),
-
-TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), color, vec2(1.0f, 1.0f)),
-TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), color, vec2(1.0f, 0.0f)),
-TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f)),
-
-TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), color, vec2(1.0f, 1.0f)),
-TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f)),
-TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), color, vec2(1.0f, 0.0f)),
-
-TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), color, vec2(1.0f, 1.0f)),
-TexturedColoredVertex(vec3(-0.5f,-0.5f, 0.5f), color, vec2(0.0f, 1.0f)),
-TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f)),
-
-TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), color, vec2(0.0f, 1.0f)),
-TexturedColoredVertex(vec3(-0.5f,-0.5f, 0.5f), color, vec2(0.0f, 0.0f)),
-TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), color, vec2(1.0f, 0.0f)),
-
-TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f)),
-TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), color, vec2(0.0f, 1.0f)),
-TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), color, vec2(1.0f, 0.0f)),
-
-TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f)),
-TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f)),
-TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), color, vec2(1.0f, 0.0f)),
-
-TexturedColoredVertex(vec3(0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f)),
-TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f)),
-TexturedColoredVertex(vec3(0.5f,-0.5f, 0.5f), color, vec2(0.0f, 1.0f)),
-
-TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f)),
-TexturedColoredVertex(vec3(0.5f, 0.5f,-0.5f), color, vec2(1.0f, 0.0f)),
-TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), color, vec2(0.0f, 0.0f)),
-
-TexturedColoredVertex(vec3(0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f)),
-TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), color, vec2(0.0f, 0.0f)),
-TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), color, vec2(0.0f, 1.0f))
-    };
-
-    // Create a vertex array
-    GLuint vertexArrayObject;
-    glGenVertexArrays(1, &vertexArrayObject);
-    glBindVertexArray(vertexArrayObject);
-
-    // Upload Vertex Buffer to the GPU, keep a reference to it (vertexBufferObject)
-    GLuint vertexBufferObject;
-    glGenBuffers(1, &vertexBufferObject);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(texturedCubeVertexArray), texturedCubeVertexArray, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0,                   // attribute 0 matches aPos in Vertex Shader
-        3,                   // size
-        GL_FLOAT,            // type
-        GL_FALSE,            // normalized?
-        sizeof(TexturedColoredVertex), // stride - each vertex contain 2 vec3 (position, color)
-        (void*)0             // array buffer offset
-    );
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1,                            // attribute 1 matches aColor in Vertex Shader
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(TexturedColoredVertex),
-        (void*)sizeof(vec3)      // color is offseted a vec3 (comes after position)
-    );
-    glEnableVertexAttribArray(1);
-
-    glVertexAttribPointer(2,                            // attribute 2 matches aUV in Vertex Shader
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(TexturedColoredVertex),
-        (void*)(2 * sizeof(vec3))      // uv is offseted by 2 vec3 (comes after position and color)
-    );
-    glEnableVertexAttribArray(2);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0); // VAO already stored the state we just defined, safe to unbind buffer
-    glBindVertexArray(0); // Unbind to not modify the VAO
-
-    glBindVertexArray(vertexBufferObject);
-
-    return vertexArrayObject;
-}
 
 int createLineVertexArrayObject()
 {
@@ -205,34 +110,20 @@ int createLineVertexArrayObject()
     glGenVertexArrays(1, &vertexArrayObject);
     glBindVertexArray(vertexArrayObject);
 
-
     // Upload Vertex Buffer to the GPU, keep a reference to it (vertexBufferObject)
     GLuint vertexBufferObject;
     glGenBuffers(1, &vertexBufferObject);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexArray), vertexArray, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0,                   // attribute 0 matches aPos in Vertex Shader
-        3,                   // size
-        GL_FLOAT,            // type
-        GL_FALSE,            // normalized?
-        2 * sizeof(vec3), // stride - each vertex contain 2 vec3 (position, color)
-        (void*)0             // array buffer offset
-    );
+    glVertexAttribPointer(0 ,3,GL_FLOAT, GL_FALSE, 2 * sizeof(vec3),(void*)0);
     glEnableVertexAttribArray(0);
 
-
-    glVertexAttribPointer(1,                            // attribute 1 matches aColor in Vertex Shader
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        2 * sizeof(vec3),
-        (void*)sizeof(vec3)      // color is offseted a vec3 (comes after position)
-    );
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(vec3), (void*)sizeof(vec3));
     glEnableVertexAttribArray(1);
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0); // VAO already stored the state we just defined, safe to unbind buffer
-    glBindVertexArray(0); // Unbind to not modify the VAO
+    glBindBuffer(GL_ARRAY_BUFFER, 0); 
+    glBindVertexArray(0); 
 
     return vertexArrayObject;
 }
@@ -249,43 +140,43 @@ int createCubeVertexArrayObject(vec3 color)
         vec3(-0.5f, 0.5f, 0.5f), color,
         vec3(-0.5f, 0.5f,-0.5f), color,
 
-        vec3(0.5f, 0.5f,-0.5f), color,
+        vec3( 0.5f, 0.5f,-0.5f), color,
         vec3(-0.5f,-0.5f,-0.5f), color,
         vec3(-0.5f, 0.5f,-0.5f), color,
 
-        vec3(0.5f, 0.5f,-0.5f), color,
-        vec3(0.5f,-0.5f,-0.5f), color,
+        vec3( 0.5f, 0.5f,-0.5f), color,
+        vec3( 0.5f,-0.5f,-0.5f), color,
         vec3(-0.5f,-0.5f,-0.5f),color,
 
-        vec3(0.5f,-0.5f, 0.5f), color,
+        vec3( 0.5f,-0.5f, 0.5f), color,
         vec3(-0.5f,-0.5f,-0.5f), color,
-        vec3(0.5f,-0.5f,-0.5f), color,
+        vec3( 0.5f,-0.5f,-0.5f), color,
 
-        vec3(0.5f,-0.5f, 0.5f), color,
+        vec3( 0.5f,-0.5f, 0.5f), color,
         vec3(-0.5f,-0.5f, 0.5f), color,
         vec3(-0.5f,-0.5f,-0.5f), color,
 
         vec3(-0.5f, 0.5f, 0.5f), color,
         vec3(-0.5f,-0.5f, 0.5f), color,
-        vec3(0.5f,-0.5f, 0.5f), color,
+        vec3( 0.5f,-0.5f, 0.5f), color,
 
-        vec3(0.5f, 0.5f, 0.5f), color,
+        vec3( 0.5f, 0.5f, 0.5f), color,
         vec3(-0.5f, 0.5f, 0.5f), color,
-        vec3(0.5f,-0.5f, 0.5f), color,
+        vec3( 0.5f,-0.5f, 0.5f), color,
 
-        vec3(0.5f, 0.5f, 0.5f), color,
-        vec3(0.5f,-0.5f,-0.5f), color,
-        vec3(0.5f, 0.5f,-0.5f), color,
+        vec3( 0.5f, 0.5f, 0.5f), color,
+        vec3( 0.5f,-0.5f,-0.5f), color,
+        vec3( 0.5f, 0.5f,-0.5f), color,
 
-        vec3(0.5f,-0.5f,-0.5f), color,
-        vec3(0.5f, 0.5f, 0.5f), color,
-        vec3(0.5f,-0.5f, 0.5f), color,
+        vec3( 0.5f,-0.5f,-0.5f), color,
+        vec3( 0.5f, 0.5f, 0.5f), color,
+        vec3( 0.5f,-0.5f, 0.5f), color,
 
-        vec3(0.5f, 0.5f, 0.5f), color,
-        vec3(0.5f, 0.5f,-0.5f), color,
+        vec3( 0.5f, 0.5f, 0.5f), color,
+        vec3( 0.5f, 0.5f,-0.5f), color,
         vec3(-0.5f, 0.5f,-0.5f), color,
 
-        vec3(0.5f, 0.5f, 0.5f), color,
+        vec3( 0.5f, 0.5f, 0.5f), color,
         vec3(-0.5f, 0.5f,-0.5f), color,
         vec3(-0.5f, 0.5f, 0.5f), color
     };
@@ -309,6 +200,87 @@ int createCubeVertexArrayObject(vec3 color)
 
     glBindBuffer(GL_ARRAY_BUFFER, 0); // VAO already stored the state we just defined, safe to unbind buffer
     glBindVertexArray(0); // Unbind to not modify the VAO
+
+    glBindVertexArray(vertexBufferObject);
+
+    return vertexArrayObject;
+}
+
+int createTexturedCubeVertexArrayObject(vec3 color)
+{
+    const TexturedColoredVertex texturedCubeVertexArray[] = {
+        // position,       color        texture   
+        TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f)),
+        TexturedColoredVertex(vec3(-0.5f,-0.5f, 0.5f), color, vec2(0.0f, 1.0f)),
+        TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f)),
+
+        TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f)),
+        TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f)),
+        TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), color, vec2(1.0f, 0.0f)),
+
+        TexturedColoredVertex(vec3( 0.5f, 0.5f,-0.5f), color, vec2(1.0f, 1.0f)),
+        TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f)),
+        TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), color, vec2(0.0f, 1.0f)),
+
+        TexturedColoredVertex(vec3( 0.5f, 0.5f,-0.5f), color, vec2(1.0f, 1.0f)),
+        TexturedColoredVertex(vec3( 0.5f,-0.5f,-0.5f), color, vec2(1.0f, 0.0f)),
+        TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f)),
+
+        TexturedColoredVertex(vec3( 0.5f,-0.5f, 0.5f), color, vec2(1.0f, 1.0f)),
+        TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f)),
+        TexturedColoredVertex(vec3( 0.5f,-0.5f,-0.5f), color, vec2(1.0f, 0.0f)),
+
+        TexturedColoredVertex(vec3( 0.5f,-0.5f, 0.5f), color, vec2(1.0f, 1.0f)),
+        TexturedColoredVertex(vec3(-0.5f,-0.5f, 0.5f), color, vec2(0.0f, 1.0f)),
+        TexturedColoredVertex(vec3(-0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f)),
+
+        TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), color, vec2(0.0f, 1.0f)),
+        TexturedColoredVertex(vec3(-0.5f,-0.5f, 0.5f), color, vec2(0.0f, 0.0f)),
+        TexturedColoredVertex(vec3( 0.5f,-0.5f, 0.5f), color, vec2(1.0f, 0.0f)),
+
+        TexturedColoredVertex(vec3( 0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f)),
+        TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), color, vec2(0.0f, 1.0f)),
+        TexturedColoredVertex(vec3( 0.5f,-0.5f, 0.5f), color, vec2(1.0f, 0.0f)),
+
+        TexturedColoredVertex(vec3( 0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f)),
+        TexturedColoredVertex(vec3( 0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f)),
+        TexturedColoredVertex(vec3( 0.5f, 0.5f,-0.5f), color, vec2(1.0f, 0.0f)),
+
+        TexturedColoredVertex(vec3( 0.5f,-0.5f,-0.5f), color, vec2(0.0f, 0.0f)),
+        TexturedColoredVertex(vec3( 0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f)),
+        TexturedColoredVertex(vec3( 0.5f,-0.5f, 0.5f), color, vec2(0.0f, 1.0f)),
+
+        TexturedColoredVertex(vec3( 0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f)),
+        TexturedColoredVertex(vec3( 0.5f, 0.5f,-0.5f), color, vec2(1.0f, 0.0f)),
+        TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), color, vec2(0.0f, 0.0f)),
+
+        TexturedColoredVertex(vec3( 0.5f, 0.5f, 0.5f), color, vec2(1.0f, 1.0f)),
+        TexturedColoredVertex(vec3(-0.5f, 0.5f,-0.5f), color, vec2(0.0f, 0.0f)),
+        TexturedColoredVertex(vec3(-0.5f, 0.5f, 0.5f), color, vec2(0.0f, 1.0f))
+    };
+
+    // Create a vertex array
+    GLuint vertexArrayObject;
+    glGenVertexArrays(1, &vertexArrayObject);
+    glBindVertexArray(vertexArrayObject);
+
+    // Upload Vertex Buffer to the GPU, keep a reference to it (vertexBufferObject)
+    GLuint vertexBufferObject;
+    glGenBuffers(1, &vertexBufferObject);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(texturedCubeVertexArray), texturedCubeVertexArray, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedColoredVertex),(void*)0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT,GL_FALSE, sizeof(TexturedColoredVertex),(void*)sizeof(vec3));
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 2, GL_FLOAT,GL_FALSE,sizeof(TexturedColoredVertex),(void*)(2 * sizeof(vec3)));
+    glEnableVertexAttribArray(2);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0); 
+    glBindVertexArray(0);
 
     glBindVertexArray(vertexBufferObject);
 
@@ -507,14 +479,48 @@ int main(int argc, char* argv[])
         createCubeVertexArrayObject(vec3(0.85f, 0.85f, 0.85f));
         setWorldMatrix(colorShaderProgram, olaf);
 
+            float olafLimbRotationAmount = 2.5f;
+
+        float footAngle = 0.0f;
+        float footDistanceFromBase = 1.0f;
+        if (moveForwardAndBack)
+        {
+            footAngle = (int)(25 * sin(lastFrameTime * 5)) % 75;
+        }
+        else if (moveLeftRight)
+        {
+            footAngle = (int)(25 * sin(lastFrameTime * 3)) % 75;
+        }
+        // Olaf left leg
         mat4 leftLeg_olaf = olaf;
-        leftLeg_olaf = translate(olaf, vec3(-0.5f, 0.25f, 0.0f)) * scale(mat4(1.0), vec3(0.5f, 0.5f, 0.5f));
+        leftLeg_olaf = translate(olaf, vec3(-0.5f, 0.25f, 0.0f)) * scale(mat4(1.0), vec3(0.5f, 1.0f, 0.5f));
+
+        if (moveForwardAndBack)
+        {
+            leftLeg_olaf = rotate(leftLeg_olaf, radians(footAngle), vec3(1.0f, 0.0f, 0.0f));
+        }
+        else if (moveLeftRight)
+        {
+            leftLeg_olaf = rotate(leftLeg_olaf, radians(footAngle), vec3(0.0f, 0.0f, 1.0f));
+        }
+
+
         setWorldMatrix(colorShaderProgram, leftLeg_olaf);
         glDrawArrays(renderMode, 0, 36);
 
         // Olaf right leg
         mat4 rightLeg_olaf = olaf;
-        rightLeg_olaf = translate(rightLeg_olaf, vec3(0.5f, 0.25f, 0.0f)) * scale(mat4(1.0), vec3(0.5f, 0.5f, 0.5f));
+        rightLeg_olaf = translate(rightLeg_olaf, vec3(0.5f, 0.25f, 0.0f)) * scale(mat4(1.0), vec3(0.5f, 1.0f, 0.5f));
+
+        if (moveForwardAndBack)
+        {
+            rightLeg_olaf = rotate(rightLeg_olaf, radians(-footAngle), vec3(1.0f, 0.0f, 0.0f));
+        }
+        else if (moveLeftRight)
+        {
+            rightLeg_olaf = rotate(rightLeg_olaf, radians(footAngle), vec3(0.0f, 0.0f, 1.0f));
+        }
+
         setWorldMatrix(colorShaderProgram, rightLeg_olaf);
         glDrawArrays(renderMode, 0, 36);
 
@@ -644,21 +650,26 @@ int main(int argc, char* argv[])
             drawGrid = false;
         }
 
+
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) // move left
         {
             olaf = translate(olaf, vec3(-0.1f, 0.0f, 0.0f));
+            moveLeftRight = true;
         }
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) // move right
         {
             olaf = translate(olaf, vec3(0.1f, 0.0f, 0.0f));
+            moveLeftRight = true;
         }
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) // move back
         {
             olaf = translate(olaf, vec3(0.0f, 0.0f, -0.1f));
+            moveForwardAndBack = true;
         }
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) // move forth
         {
             olaf = translate(olaf, vec3(0.0f, 0.0f, 0.1f));
+            moveForwardAndBack = true;
         }
         if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) // rotate left
         {
@@ -792,6 +803,7 @@ int main(int argc, char* argv[])
     glfwTerminate();
     return 0;
 }
+
 
 const char* getVertexShaderSource()
 {
